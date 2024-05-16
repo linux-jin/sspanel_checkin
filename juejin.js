@@ -42,20 +42,16 @@ if (JUEJIN_COOKIE.indexOf('&') > -1) {
         if (cookiesArr[i]) {
             cookie = cookiesArr[i];
             $.index = i + 1;
-            // 默认 Cookie 未失效
             $.isLogin = true;
-            // 默认今日未签到
-            $.isSignIn = false;
             // 免费抽奖次数
             $.freeCount = 0;
             // 账号总矿石数
             $.oreNum = 0;
-            // 检测状态 (今日是否签到、Cookie 是否失效)
-            await checkStatus();
             console.log(`\n*****开始第【${$.index}】个账号****\n`);
+            await checkStatus();
             message += `📣==========掘金账号${$.index}==========📣\n`;
             if (!$.isLogin) {
-                await notify.sendNotify(`「掘金签到报告」`, `掘金账号${$.index} Cookie已失效，请重新登录获取Cookie`);
+                await notify.sendNotify(`「掘金签到报告」`, `掘金账号${$.index} Cookie 已失效，请重新登录获取 Cookie`);
             }
             await main();
             await $.wait(2000);
@@ -72,59 +68,27 @@ if (JUEJIN_COOKIE.indexOf('&') > -1) {
 
 async function main() {
     await getUserName();
-    await $.wait(1000);
-    if (!$.isSignIn) {
-        await checkIn();
-        await $.wait(1000);
-        await getCount();
-    } else {
-        console.log(`您今日已完成签到，请勿重复签到~\n`);
-    }
+    await checkIn();
+    await getCount();
     await queryFreeLuckyDrawCount();
-    await $.wait(1000);
-    if ($.freeCount > 0) {
-        // 目前只利用签到所获取的抽奖次数进行抽奖！
-        await luckyDraw();
+    if ($.freeCount === 0) {
+        message += `【抽奖信息】白嫖次数已用尽~\n`
     } else {
-        console.log(`今日免费抽奖次数已用尽!\n`);
+        await luckyDraw();
     }
-    await $.wait(1000);
     await getOreNum();
-    await $.wait(1000);
-    if (enableTenDraw) {
-        console.log(`检测到你已开启十连抽，正在为你执行十连抽...`);
+    message += `=============【十连抽详情】=============\n`
+    if (!enableTenDraw) {
+        message += `未设置十连抽变量 ENABLE_TEN_DRAW, 取消十连抽\n`;
+    } else {
+        $.log(`检测到你已开启十连抽，正在为你执行十连抽...`);
         for (let i = 0; i < tenDrawNum; i++) {
             await tenDraw();
-            await $.wait(2000);
+            if (i < tenDrawNum - 1) {
+                await $.wait(2000);
+            }
         }
     }
-}
-
-/**
- * 检测签到状态
- */
-function checkStatus() {
-    return new Promise((resolve) => {
-        $.get(sendGet('growth_api/v1/get_today_status', ''), (err, response, data) => {
-            try {
-                if (err) {
-                    console.log(`checkStatus API 请求失败\n${JSON.stringify(err)}`)
-                } else {
-                    data = JSON.parse(data);
-                    // 今日是否已签到 true: 已签到 false: 未签到
-                    $.isSignIn = data.data;
-                    if (403 === data.err_no) {
-                        // Cookie 已失效
-                        $.isLogin = false;
-                    }
-                }
-            } catch (err) {
-                $.logErr(err, response);
-            } finally {
-                resolve();
-            }
-        })
-    })
 }
 
 /**
@@ -141,77 +105,13 @@ function checkIn() {
                 } else {
                     data = JSON.parse(data);
                     // 签到所获取的矿石数
-                    $.incrPoint = data.data.incr_point;
+                    let incrPoint = data.data.incr_point;
                     // 当前账号总矿石数
-                    $.sumPoint = data.data.sum_point;
-                    message += `【账号昵称】${$.userName}\n【签到状态】已签到\n【今日收入】${$.incrPoint}矿石数\n【总矿石数】${$.sumPoint}矿石数`
-                }
-            } catch (err) {
-                $.logErr(err, response);
-            } finally {
-                resolve();
-            }
-        })
-    })
-}
-
-/**
- * 抽奖函数
- * 目前已知奖品
- * lottery_id: 6981716980386496552、name: 66矿石、type: 1
- * lottery_id: 6981716405976743943、name: Bug、type: 2
- * lottery_id: 7020245697131708419、name: 掘金帆布袋、type: 4
- * lottery_id: 7017679355841085472、name: 随机限量徽章、type: 4
- * lottery_id: 6997270183769276416、name: Yoyo抱枕、type: 4
- * lottery_id: 7001028932350771203、name: 掘金马克杯、type: 4
- * lottery_id: 7020306802570952718、name: 掘金棒球帽、type: 4
- * lottery_id: 6981705951946489886、name: Switch、type: 3
- */
-function luckyDraw() {
-    return new Promise((resolve) => {
-        $.post(sendPost('growth_api/v1/lottery/draw', ``), (err, response, data) => {
-            try {
-                if (err) {
-                    console.log(`luckyDraw API 请求失败\n${JSON.stringify(err)}`)
-                } else {
-                    data = JSON.parse(data);
-                    console.log(`抽中了${data.data.lottery_name}\n`);
-                    message += `\n【抽奖信息】抽中了${data.data.lottery_name}\n\n`;
-                }
-            } catch (err) {
-                $.logErr(err, response);
-            } finally {
-                resolve();
-            }
-        })
-    })
-}
-
-/**
- * 十连抽
- */
-function tenDraw() {
-    return new Promise((resolve) => {
-        $.post(sendPost('growth_api/v1/lottery/ten_draw', ``), (err, response, data) => {
-            try {
-                if (err) {
-                    console.log(`tenDraw API 请求失败\n${JSON.stringify(err)}`)
-                } else {
-                    if (2000 > $.oreNum) {
-                        console.log(`当前账号不足 2000 矿石数，十连抽失败~`)
-                    } else {
-                        // 单抽加 10 幸运值、十连抽加 100 幸运值，6000 满格
-                        console.log(`本次十连抽共消耗 2000 矿石数\n十连抽奖励为: `)
-                        data = JSON.parse(data);
-                        $.lotteryBases = data.data.LotteryBases;
-                        for (let draw of $.lotteryBases) {
-                            console.log(`${draw.lottery_name}`)
-                        }
-                        let needOreNum = (6000 - data.data.total_lucky_value) / 100 * 2000;
-                        console.log(`本次十连抽加${data.data.draw_lucky_value}幸运值`);
-                        console.log(`当前总幸运值为${data.data.total_lucky_value}`);
-                        console.log(`离幸运值满格还差${6000 - data.data.total_lucky_value}幸运值，所需${needOreNum}矿石数，还需十连抽${(6000 - data.data.total_lucky_value) / 100}次`);
+                    let sumPoint = data.data.sum_point;
+                    if (15001 === data.err_no) {
+                        message += `【签到详情】今天已经签到过了!\n【总矿石数】${sumPoint}矿石\n`;
                     }
+                    message += `【签到详情】今日签到获得${incrPoint}矿石数\n【总矿石数】${sumPoint}矿石\n`;
                 }
             } catch (err) {
                 $.logErr(err, response);
@@ -223,21 +123,33 @@ function tenDraw() {
 }
 
 /**
- * 查询免费抽奖次数
+ * 获取昵称
  */
-function queryFreeLuckyDrawCount() {
+function getUserName() {
     return new Promise((resolve) => {
-        $.get(sendGet('growth_api/v1/lottery_config/get', ``), (err, response, data) => {
+        $.get(sendGet('user_api/v1/user/get', ``), (err, response, data) => {
             try {
                 if (err) {
-                    console.log(`queryFreeLuckyDrawCount API 请求失败\n${JSON.stringify(err)}`)
+                    console.log(`getUserName API 请求失败\n${JSON.stringify(err)}`)
                 } else {
                     data = JSON.parse(data);
-                    // 获取免费抽奖次数
-                    $.freeCount = data.data.free_count;
+                    // 用户昵称
+                    let userName = data.data.user_name;
+                    // 获取等级
+                    let jscoreLevel = data.data.user_growth_info.jscore_level;
+                    // 获取等级称号
+                    let jscoreTitle = data.data.user_growth_info.jscore_title;
+                    // 下一等级的分数
+                    let jscoreNextLevelScore = data.data.user_growth_info.jscore_next_level_score;
+                    // 掘友分
+                    let jscore = data.data.user_growth_info.jscore;
+                    if (jscoreLevel === 8) {
+                        message += `【账号昵称】${userName}\n【等级详情】满级大佬\n`;
+                    }
+                    message += `【账号昵称】${userName}\n【等级详情】${jscoreTitle}(${jscoreLevel}级)、掘友分: ${jscore}、还需${jscoreNextLevelScore - jscore}分可升至掘友${jscoreLevel + 1}级\n`;
                 }
             } catch (err) {
-                $.logErr(err, response);
+                // $.logErr(err, response);
             } finally {
                 resolve();
             }
@@ -270,17 +182,18 @@ function getOreNum() {
 
 
 /**
- * 获取昵称
+ * 查询免费抽奖次数
  */
-function getUserName() {
+function queryFreeLuckyDrawCount() {
     return new Promise((resolve) => {
-        $.get(sendGet('user_api/v1/user/get', ``), (err, response, data) => {
+        $.get(sendGet('growth_api/v1/lottery_config/get', ``), (err, response, data) => {
             try {
                 if (err) {
-                    console.log(`getUserName API 请求失败\n${JSON.stringify(err)}`)
+                    console.log(`queryFreeLuckyDrawCount API 请求失败\n${JSON.stringify(err)}`)
                 } else {
                     data = JSON.parse(data);
-                    $.userName = data.data.user_name;
+                    // 获取免费抽奖次数
+                    $.freeCount = data.data.free_count;
                 }
             } catch (err) {
                 $.logErr(err, response);
@@ -290,6 +203,7 @@ function getUserName() {
         })
     })
 }
+
 
 /**
  * 统计签到天数, 没什么用~
@@ -302,7 +216,102 @@ function getCount() {
                     console.log(`getCount API 请求失败\n${JSON.stringify(err)}`)
                 } else {
                     data = JSON.parse(data);
-                    message += `\n【签到统计】连签${data.data.cont_count}天、累签${data.data.sum_count}天`
+                    message += `【签到统计】连续签到${data.data.cont_count}天、累计签到${data.data.sum_count}天\n`
+                }
+            } catch (err) {
+                $.logErr(err, response);
+            } finally {
+                resolve();
+            }
+        })
+    })
+}
+
+/**
+ * 抽奖函数
+ * 目前已知奖品
+ * lottery_id: 6981716980386496552、name: 66矿石、type: 1
+ * lottery_id: 6981716405976743943、name: Bug、type: 2
+ * lottery_id: 7020245697131708419、name: 掘金帆布袋、type: 4
+ * lottery_id: 7017679355841085472、name: 随机限量徽章、type: 4
+ * lottery_id: 6997270183769276416、name: Yoyo抱枕、type: 4
+ * lottery_id: 7001028932350771203、name: 掘金马克杯、type: 4
+ * lottery_id: 7020306802570952718、name: 掘金棒球帽、type: 4
+ * lottery_id: 6981705951946489886、name: Switch、type: 3
+ */
+function luckyDraw() {
+    return new Promise((resolve) => {
+        $.post(sendPost('growth_api/v1/lottery/draw', ``), (err, response, data) => {
+            try {
+                if (err) {
+                    console.log(`luckyDraw API 请求失败\n${JSON.stringify(err)}`)
+                } else {
+                    data = JSON.parse(data);
+                    message += `【抽奖信息】抽中了${data.data.lottery_name}\n`;
+                }
+            } catch (err) {
+                $.logErr(err, response);
+            } finally {
+                resolve();
+            }
+        })
+    })
+}
+
+/**
+ * 十连抽
+ */
+function tenDraw() {
+    return new Promise((resolve) => {
+        $.post(sendPost('growth_api/v1/lottery/ten_draw', ``), (err, response, data) => {
+            try {
+                if (err) {
+                    console.log(`tenDraw API 请求失败\n${JSON.stringify(err)}`)
+                } else {
+                    if (2000 > $.oreNum) {
+                        message += `账号总矿石数不足 2000，取消十连抽！\n`
+                        console.log(`账号总矿石数不足 2000，取消十连抽！`)
+                        return;
+                    }
+                    // 单抽加 10 幸运值、十连抽加 100 幸运值，6000 满格
+                    console.log(`本次十连抽共消耗 2000 矿石数\n十连抽奖励为: `)
+                    data = JSON.parse(data);
+                    $.lotteryBases = data.data.LotteryBases;
+                    for (let draw of $.lotteryBases) {
+                        message += `抽中了${draw.lottery_name}\n`
+                        console.log(`抽中了${draw.lottery_name}`)
+                    }
+                    let needOreNum = (6000 - data.data.total_lucky_value) / 100 * 2000;
+                    message += `本次十连抽加${data.data.draw_lucky_value}幸运值，当前幸运值为${data.data.total_lucky_value}，离满格还差${6000 - data.data.total_lucky_value}幸运值，所需${needOreNum}矿石数，还需十连抽${(6000 - data.data.total_lucky_value) / 100}次\n\n`;
+                    console.log(`本次十连抽加${data.data.draw_lucky_value}幸运值`);
+                    console.log(`当前幸运值为${data.data.total_lucky_value}`);
+                    console.log(`离幸运值满格还差${6000 - data.data.total_lucky_value}幸运值，所需${needOreNum}矿石数，还需十连抽${(6000 - data.data.total_lucky_value) / 100}次`);
+                }
+            } catch (err) {
+                $.logErr(err, response);
+            } finally {
+                resolve();
+            }
+        })
+    })
+}
+
+/**
+ * 检测状态
+ */
+function checkStatus() {
+    return new Promise((resolve) => {
+        $.get(sendGet('growth_api/v1/get_today_status', ''), (err, response, data) => {
+            try {
+                if (err) {
+                    console.log(`checkStatus API 请求失败\n${JSON.stringify(err)}`)
+                } else {
+                    data = JSON.parse(data);
+                    if (403 === data.err_no) {
+                        // Cookie 已失效
+                        $.isLogin = false;
+                    }
+                    console.log(data);
                 }
             } catch (err) {
                 $.logErr(err, response);
