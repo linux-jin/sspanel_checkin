@@ -6,7 +6,7 @@
  * @last Modified time 2022/01/21 20:37
  * @description 掘金自动签到
  */
-const $ = new require('env').Env('掘金自动签到');
+const $ = new require('./env').Env('掘金自动签到');
 const notify = $.isNode() ? require('./sendNotify') : '';
 let JUEJIN_COOKIE = process.env.JUEJIN_COOKIE, cookie = '', cookiesArr = [], message = '';
 
@@ -61,7 +61,7 @@ if (JUEJIN_COOKIE.indexOf('&') > -1) {
         await notify.sendNotify(`「掘金签到报告」`, `${message}`);
     }
 })().catch((e) => {
-    $.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
+    console.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
 }).finally(() => {
     $.done();
 });
@@ -81,7 +81,7 @@ async function main() {
     if (!enableTenDraw) {
         message += `未设置十连抽变量 ENABLE_TEN_DRAW, 取消十连抽\n`;
     } else {
-        $.log(`检测到你已开启十连抽，正在为你执行十连抽...`);
+        console.log(`检测到你已开启十连抽，正在为你执行十连抽...`);
         for (let i = 0; i < tenDrawNum; i++) {
             await tenDraw();
             if (i < tenDrawNum - 1) {
@@ -114,7 +114,7 @@ function checkIn() {
                     message += `【签到详情】今日签到获得${incrPoint}矿石数\n【总矿石数】${sumPoint}矿石\n`;
                 }
             } catch (err) {
-                $.logErr(err, response);
+                console.log(err, response);
             } finally {
                 resolve();
             }
@@ -149,7 +149,7 @@ function getUserName() {
                     message += `【账号昵称】${userName}\n【等级详情】${jscoreTitle}(${jscoreLevel}级)、掘友分: ${jscore}、还需${jscoreNextLevelScore - jscore}分可升至掘友${jscoreLevel + 1}级\n`;
                 }
             } catch (err) {
-                // $.logErr(err, response);
+                // console.log(err, response);
             } finally {
                 resolve();
             }
@@ -172,7 +172,7 @@ function getOreNum() {
                     $.oreNum = data.data;
                 }
             } catch (err) {
-                $.logErr(err, response);
+                console.log(err, response);
             } finally {
                 resolve();
             }
@@ -196,7 +196,7 @@ function queryFreeLuckyDrawCount() {
                     $.freeCount = data.data.free_count;
                 }
             } catch (err) {
-                $.logErr(err, response);
+                console.log(err, response);
             } finally {
                 resolve();
             }
@@ -219,7 +219,7 @@ function getCount() {
                     message += `【签到统计】连续签到${data.data.cont_count}天、累计签到${data.data.sum_count}天\n`
                 }
             } catch (err) {
-                $.logErr(err, response);
+                console.log(err, response);
             } finally {
                 resolve();
             }
@@ -250,7 +250,7 @@ function luckyDraw() {
                     message += `【抽奖信息】抽中了${data.data.lottery_name}\n`;
                 }
             } catch (err) {
-                $.logErr(err, response);
+                console.log(err, response);
             } finally {
                 resolve();
             }
@@ -288,7 +288,7 @@ function tenDraw() {
                     console.log(`离幸运值满格还差${6000 - data.data.total_lucky_value}幸运值，所需${needOreNum}矿石数，还需十连抽${(6000 - data.data.total_lucky_value) / 100}次`);
                 }
             } catch (err) {
-                $.logErr(err, response);
+                console.log(err, response);
             } finally {
                 resolve();
             }
@@ -314,7 +314,7 @@ function checkStatus() {
                     console.log(data);
                 }
             } catch (err) {
-                $.logErr(err, response);
+                console.log(err, response);
             } finally {
                 resolve();
             }
