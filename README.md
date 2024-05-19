@@ -5,8 +5,9 @@
     一些脚本，每天定时自动签到
     <br />
     <br />
-    <a href="https://github.com/sudojia/scripts/issues/new">上报Bug、意见反馈</a>
+    <a href="https://github.com/sudojia/scripts/issues/new">上报 Bug、意见反馈</a>
   </p>
+
 
 
 
@@ -17,6 +18,8 @@
 - [⚠️注意事项](#%EF%B8%8F注意事项)
 - [🔛使用](#使用)
 - [🎯TODO](#TODO)
+- [⭐点个 Star 支持作者](#点个-star-支持作者)
+- [⚖️许可证](#许可证)
 - [🕛历程](#历程)
 
 ## 💍介绍
@@ -52,11 +55,7 @@ PS：最近发现掘金社区多了个成长等级，感觉可以写一写，有
 
 `Settings - Secrets - New repository secret`
 
-如果你需要签到 SSPANEL 面板，就填写 `SITE_ACCOUNTS` 变量
-
-如果你需要签到掘金，就填写 `JUEJIN_COOKIE` 变量
-
-...
+> 需要使用哪个就使用哪个的变量
 
 ### SSPANEL
 
@@ -66,11 +65,13 @@ PS：最近发现掘金社区多了个成长等级，感觉可以写一写，有
 
 ### 掘金
 
-|      Name       |    Value    |                             说明                             |
-| :-------------: | :---------: | :----------------------------------------------------------: |
-| `JUEJIN_COOKIE` | 掘金 Cookie | 打开[掘金社区](https://juejin.cn/) F12，选择 Application，点击 Cookies<br/>填写规则：`sessionid=xxxxxxxxx` |
+|      Name       |           Value            |                             说明                             |
+| :-------------: | :------------------------: | :----------------------------------------------------------: |
+| `JUEJIN_COOKIE` | eg:  `xxxxxxxxxxxxxxxxxxx` | 掘金 Cookie，打开[掘金社区](https://juejin.cn/) F12，选择 Application，点击 Cookies<br>只要 `sessionid` 的值并填入 Secrets 即可，多个掘金号用 `&` 隔开<br>eg: `xxxxxxxx&xxxxxxxx` |
 
-### Steam 游玩时长获取
+![images](https://img2.imgtp.com/2024/05/19/M3EbSqId.png)
+
+### 获取 Steam 两周内游玩详情
 
 每周六的早上八点执行, 可自行 [Fork](https://github.com/login?return_to=%2Fsudojia%2Fscripts) 后更改 [stam_playtime.yml](https://github.com/sudojia/scripts/blob/83eeb06c36f7a2021d358262709a5a82ced01b2f/.github/workflows/stam_playtime.yml#L7)
 
@@ -79,7 +80,37 @@ PS：最近发现掘金社区多了个成长等级，感觉可以写一写，有
 | `STEAM_TOKEN` | 前往 https://steamcommunity.com/dev/apikey 注册你的 Steam Web API 密钥<br>eg: AB2C3xxxxxxxxxxxxxxxxx64xxxx | 填入你的密钥<br>eg: AB2C3xxxxxxxxxxxxxxxxx64xxxx |
 | `STEAM_64_ID` | 前往 https://steamid.top/ 获取你的 64 位 Steam ID<br>也可登录 [Steam](https://steamcommunity.com/login/home/) 并前往你的 Steam 个人主页 URL 地址栏直接获取<br>https://steamcommunity.com/profiles/76561xxxxxxxxx/<br>URL 最后那一串数字即是 64 位 Steam ID |                eg:76561xxxxxxxxx                 |
 
+### 阿里云盘
+
+|        Name         |                Value                |                  说明                   |
+| :-----------------: | :---------------------------------: | :-------------------------------------: |
+| `ALI_REFRESH_TOKEN` | eg: `e7b02b2k52074om8td187c62952cf` | 阿里云盘 referesh token 多个用 `&` 分开 |
+
+如何获取 **referesh token?**
+
+**第一种**：打开[阿里云盘](https://www.aliyundrive.com/)，登录后 `F12` 在控制台输入以下代码即可获取
+
+```javascript
+JSON.parse(localStorage.token).refresh_token
+```
+
+**第二种：**使用 Alist 的在线获取
+
+打开 [Alist 文档#刷新令牌](https://alist.nn.ci/zh/guide/drivers/aliyundrive.html#%E5%88%B7%E6%96%B0%E4%BB%A4%E7%89%8C)，点击获取 Token，然后使用阿里云盘 APP 扫描，扫描完成后再点击一次即可获取
+
+两种方式任选一种获取 `Referesh Token `
+
+### 百度贴吧
+
+|      Name       |                Value                |                             说明                             |
+| :-------------: | :---------------------------------: | :----------------------------------------------------------: |
+| `TIE_BA_COOKIE` | eg: `xxxxxxxxxxxxxxxxxxxxxxxxxxxxx` | 打开[百度贴吧](https://tieba.baidu.com/) -> F12，选择 Application，点击 Cookies<br/>只要 `BDUSS` 的值即可<br>多个账号用 `&` 分开 |
+
+![images](https://img2.imgtp.com/2024/05/19/HnlsgpaF.png)
+
 ### 消息推送变量（可选）
+
+如果你想要程序执行后进行消息推送，那么任选一种或多种方式进行配置
 
 |       Name        |                             归属                             |  属性  |                             说明                             |
 | :---------------: | :----------------------------------------------------------: | :----: | :----------------------------------------------------------: |
@@ -98,13 +129,8 @@ PS：最近发现掘金社区多了个成长等级，感觉可以写一写，有
 ## ⚠️注意事项
 
 1. SSPANEL 签到暂不支持密码带  `,`  与  `:`  的字符！
-2. SSPANEL 签到同一个网站，多个账号时，导致第一个能成功，第二个总是失败 - **待解决**
-
-**<font color='red'>SSPANEL 签到暂不支持带有图形验证码的机场网站！</font>**
-
-**<font color='red'>SSPANEL 签到暂不支持带有图形验证码的机场网站！</font>**
-
-**<font color='red'>SSPANEL 签到暂不支持带有图形验证码的机场网站！</font>**
+2. **<font color='red'>SSPANEL 签到暂不支持带有图形验证码的机场网站！</font>**
+3. 如果你使用 Telegram 进行消息推送，那么在 Bot 创建后需要先给 Bot 发送一条消息，Bot 才能给用户发消息 [issues#9](https://github.com/sudojia/scripts/issues/9)
 
 ## 🔛使用
 
@@ -134,22 +160,25 @@ PS：最近发现掘金社区多了个成长等级，感觉可以写一写，有
 - [x] 多账号
 - [x] 多网站
 - [x] 消息推送
-- [ ] 掘金社区一键梭哈
-- [ ] ...
+- [ ] 
 
 ## ⭐点个 Star 支持作者
-<!-- ![](https://api.star-history.com/svg?repos=sudojia/scripts&type=Date) -->
 
 <p align='center'>
   <img src="https://api.star-history.com/svg?repos=sudojia/scripts&type=Date">
 </p>
+
 ## ⚖️许可证
 
-本脚本库使用 [GPLv3](https://github.com/sudojia/scripts/blob/master/LICENSE) 许可证，脚本库中任何脚本不经允许**不可商用**。宣传或转载时请带上[本脚本库链接](https://github.com/sudojia/scripts)。
+本脚本库使用 [GPLv3](https://github.com/sudojia/scripts/blob/master/LICENSE) 许可证，脚本库中任何脚本未经允许**不可商用**。宣传或转载时请带上[本脚本库链接](https://github.com/sudojia/scripts)。
 
 ## 🕛历程
 
-- 2023-11-21 - 添加 Steam 游玩时长获取
+- 2024-05-18 - 添加百度贴吧、阿里云盘自动签到
+
+- 2024-05-16 - 使用 axios 进行请求并优化现有脚本
+
+- 2023-11-21 - 添加 Steam 两周内游玩详情获取
 
 - 2022-09-27 - 移除葫芦侠（葫芦侠加了签名参数）
 
