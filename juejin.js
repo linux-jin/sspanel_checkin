@@ -9,8 +9,7 @@
 const $ = require('./env').Env('掘金自动签到');
 const notify = $.isNode() ? require('./sendNotify') : '';
 const axios = require('axios').default;
-
-// 定义配置
+let cookiesArr = (process.env.JUEJIN_COOKIE || '').split('&'), message = '';
 const config = {
     // 掘金 API
     JUEJIN_API: 'https://api.juejin.cn',
@@ -18,35 +17,26 @@ const config = {
     ENABLE_TEN_DRAW: process.env.ENABLE_TEN_DRAW || false,
     // 十连抽次数
     TEN_DRAW_NUM: parseInt(process.env.TEN_DRAW_NUM) || 1,
+    COOKIE: ''
 };
-let cookiesArr = (process.env.JUEJIN_COOKIE || '').split('&'), message = '';
-
-if (!config.ENABLE_TEN_DRAW) {
-    console.log(`\n如需执行十连抽请设置环境变量【ENABLE_TEN_DRAW】\n`);
-}
 if (!Array.isArray(cookiesArr) || cookiesArr.length === 0) {
     console.log('请设置环境变量【JUEJIN_COOKIE】\n');
     process.exit(1);
 }
-
 !(async () => {
     for (let i = 0; i < cookiesArr.length; i++) {
-        $.cookie = cookiesArr[i];
-        $.index = i + 1;
-        $.isLogin = true;
-        $.freeCount = 0;
-        $.oreNum = 0;
-        console.log(`\n*****开始第【${$.index}】个账号****\n`);
-        message += `📣==========掘金账号${$.index}==========📣\n`;
+        config.COOKIE = cookiesArr[i];
+        const index = i + 1;
+        console.log(`\n*****开始第【${index}】个账号****\n`);
+        message += `📣==========掘金账号${index}==========📣\n`;
         try {
-            await checkStatus();
-            if (!$.isLogin) {
-                await notify.sendNotify(`「掘金签到报告」`, `掘金账号${$.index} Cookie 已失效，请重新登录获取 Cookie`);
+            if (403 === await checkStatus()) {
+                await notify.sendNotify(`「掘金签到报告」`, `掘金账号${index} Cookie 已失效，请重新登录获取 Cookie`);
                 continue;
             }
             await main();
         } catch (e) {
-            console.error(`账号${$.index}发生异常: ${e}`);
+            console.error(`账号${index}发生异常: ${e}`);
         } finally {
             // 确保API调用不会过于频繁
             await $.wait(2000);
@@ -64,26 +54,40 @@ if (!Array.isArray(cookiesArr) || cookiesArr.length === 0) {
  */
 async function main() {
     await getUserName();
+    await $.wait(1000);
     await checkIn();
+    await $.wait(1000);
+    const oreNum = await getOreNum();
+    message += `【总矿石数】${oreNum} 矿石\n`
+    // 签到统计
     await getCount();
-    await queryFreeLuckyDrawCount();
-    if ($.freeCount === 0) {
+    await $.wait(1000);
+    const freeCount = await queryFreeLuckyDrawCount();
+    if (freeCount === 0) {
         console.log(`白嫖次数已用尽~暂不抽奖\n`)
         message += `【抽奖信息】白嫖次数已用尽~\n`
     } else {
         await luckyDraw();
     }
-    await getOreNum();
+    console.log('开始执行十连抽...')
     message += `【十连抽详情】\n`
     if (!config.ENABLE_TEN_DRAW) {
-        message += `未设置十连抽变量 ENABLE_TEN_DRAW, 取消十连抽\n\n`;
+        message += `检测到未配置十连抽环境变量，取消十连抽...\n如需执行十连抽请配置环境变量【ENABLE_TEN_DRAW】为 true\n\n`;
+        console.log(`检测到未配置十连抽环境变量，取消十连抽...\n如需执行十连抽请配置环境变量【ENABLE_TEN_DRAW】为 true`);
         return;
     }
-    console.log(`检测到你已开启十连抽，正在为你执行十连抽...`);
+    console.log(`检测到你已开启十连抽，正在为你执行十连抽...\n等待两秒...`);
+    await $.wait(2000);
+    if (2000 > oreNum) {
+        message += `妈的，全部身家加起来矿石都不足 2000，还想十连抽???\n\n`
+        console.log(`妈的，全部身家加起来矿石都不足 2000，还想十连抽???`);
+        return;
+    }
+    console.log(`十连抽次数默认为 ${config.TEN_DRAW_NUM} 次\n如需修改，请设置环境变量【TEN_DRAW_NUM】`)
     for (let i = 0; i < config.TEN_DRAW_NUM; i++) {
         await tenDraw();
         if (i < config.TEN_DRAW_NUM - 1) {
-            await $.wait(2000);
+            await $.wait(1000);
         }
     }
 }
@@ -95,10 +99,7 @@ async function main() {
  */
 async function checkStatus() {
     const data = await sendRequest(config.JUEJIN_API + '/growth_api/v1/get_today_status', 'get', '');
-    if (403 === data.err_no) {
-        // Cookie 已失效
-        $.isLogin = false;
-    }
+    return data.data.err_no
 }
 
 /**
@@ -109,8 +110,12 @@ async function checkStatus() {
 async function checkIn() {
     const data = await sendRequest(config.JUEJIN_API + '/growth_api/v1/check_in', 'post', '')
     if (15001 === data.err_no) {
-        console.log('您今日已完成签到，请勿重复签到');
+        console.log(data.err_msg);
+        message += `【签到信息】${data.err_msg}\n`
+        return;
     }
+    message += `【签到信息】签到成功, 获得 ${data.data.incr_point} 矿石\n`
+    console.log(`签到成功，获得 ${data.data.incr_point} 矿石`);
 }
 
 /**
@@ -141,7 +146,7 @@ async function getUserName() {
 async function getOreNum() {
     const data = await sendRequest(config.JUEJIN_API + '/growth_api/v1/get_cur_point', 'get', '');
     // 当前账号总矿石数
-    $.oreNum = data.data;
+    return data.data;
 }
 
 /**
@@ -150,7 +155,7 @@ async function getOreNum() {
 async function queryFreeLuckyDrawCount() {
     const data = await sendRequest(config.JUEJIN_API + '/growth_api/v1/lottery_config/get', 'get', '')
     // 获取免费抽奖次数
-    $.freeCount = data.data.free_count;
+    return data.data.free_count;
 }
 
 
@@ -159,7 +164,7 @@ async function queryFreeLuckyDrawCount() {
  */
 async function getCount() {
     const data = await sendRequest(config.JUEJIN_API + '/growth_api/v1/get_counts', 'get', '');
-    message += `【签到统计】连续签到${data.data.cont_count}天、累计签到${data.data.sum_count}天\n`
+    message += `【签到统计】已连续签到${data.data.cont_count}天、累计签到${data.data.sum_count}天\n`
 }
 
 /**
@@ -184,17 +189,13 @@ async function luckyDraw() {
  */
 async function tenDraw() {
     const data = await sendRequest(config.JUEJIN_API + '/growth_api/v1/lottery/ten_draw', 'post', '');
-    if (2000 > $.oreNum) {
-        message += `账号总矿石数不足 2000，取消十连抽！\n\n`
-        console.log(`账号总矿石数不足 2000，取消十连抽！`)
-        return;
-    }
     // 单抽加 10 幸运值、十连抽加 100 幸运值，6000 满格
     console.log(`本次十连抽共消耗 2000 矿石数\n十连抽奖励为: `)
     $.lotteryBases = data.data.LotteryBases;
     for (let draw of $.lotteryBases) {
         message += `抽中了${draw.lottery_name}\n`
         console.log(`抽中了${draw.lottery_name}`)
+        await $.wait(1000);
     }
     // 当前幸运值
     let totalLuckyValue = data.data.total_lucky_value;
@@ -226,7 +227,7 @@ async function sendRequest(url, method, data = {}) {
             "Accept": "*/*",
             "Content-type": "application/json",
             "Referer": `${config.JUEJIN_API}`,
-            "Cookie": `sessionid=${$.cookie}`,
+            "Cookie": `sessionid=${config.COOKIE}`,
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36"
         },
         data
