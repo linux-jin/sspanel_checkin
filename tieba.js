@@ -37,13 +37,12 @@ const TIEBA_API = {
 async function main(cookie) {
     const tbs = await getTBS(cookie)
     const followList = await getTieBaFollow(cookie);
-    message += `【贴吧总计】${followList.length} 个\n`;
-    message += `*******「签到详情」*******\n`
     for (const followName of followList) {
         await signTieBa(followName, tbs, cookie);
         await $.wait(1000);
     }
     console.log(`【签到统计】成功签到 ${success.length} 个, 失败 ${followList.length - success.length} 个`);
+    message += `【贴吧总计】${followList.length} 个\n`;
     message += `【签到统计】成功签到 ${success.length} 个, 失败 ${followList.length - success.length} 个\n\n`;
 }
 
