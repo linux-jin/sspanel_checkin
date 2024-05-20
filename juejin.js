@@ -54,8 +54,7 @@ if (!Array.isArray(cookiesArr) || cookiesArr.length === 0) {
         }
     }
     if (message) {
-        console.log(message);
-        // await notify.sendNotify(`「掘金签到报告」`, `${message}`);
+        await notify.sendNotify(`「掘金签到报告」`, `${message}`);
     }
 })();
 
@@ -124,13 +123,18 @@ async function taskList() {
             const tasks = growthTasks[taskArray];
             for (const task of tasks) {
                 // 没写移动端每日登录访问和发布文章任务，所以过滤掉吧，有时间的可以和我提 PR，感谢
-                if (![4, 5].includes(task.task_id)) {
-                    // 使用 task.limit - task.done 就无需再判断任务是否已完成！
-                    for (let i = 0; i < task.limit - task.done; i++) {
-                        await performTask(task);
-                    }
+                if ([4, 5].includes(task.task_id)) {
+                    continue;
                 }
-                message += `【${task.title}】已完成${task.done}/${task.limit}\n`;
+                const taskCopy = {...task};
+                for (let i = 0; i < task.limit - task.done; i++) {
+                    await performTask(taskCopy);
+                }
+                message += `【${taskCopy.title}】已完成${taskCopy.done}/${taskCopy.limit}\n`;
+                const index = tasks.findIndex(t => t.task_id === task.task_id);
+                if (index !== -1) {
+                    tasks[index] = taskCopy;
+                }
             }
         }
     }
@@ -566,7 +570,6 @@ async function addPostToCollection(postId, collectionId) {
         unselect_collection_ids: [],
         is_collect_fast: false
     });
-    console.log(data);
     if ('success' === data.err_msg) {
         console.log('收藏文章成功！');
     }
