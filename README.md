@@ -95,7 +95,7 @@
 JSON.parse(localStorage.token).refresh_token
 ```
 
-**第二种：**使用 Alist 的在线获取
+**第二种**： 使用 Alist 的在线获取
 
 打开 [Alist 文档#刷新令牌](https://alist.nn.ci/zh/guide/drivers/aliyundrive.html#%E5%88%B7%E6%96%B0%E4%BB%A4%E7%89%8C)，点击获取 Token，然后使用阿里云盘 APP 扫描，扫描完成后再点击一次即可获取
 
@@ -119,7 +119,7 @@ JSON.parse(localStorage.token).refresh_token
 
 由于司机社分站有很多，所以任意选择一个网站登录之后，获取 `SgL6_2132_auth` 和 `SgL6_2132_saltkey` 的值即可（包括键也要填写）
 
-网站和 cookie 之间用 `@` 隔开，多个账号用 `&` 隔开。第二个键值对就不要加 `;` 了
+网站和 cookie 之间用 `@` 隔开，多个账号用 `&` 隔开。第二个的键值对后面就不要加 `;` 了
 
 单个填写示例：
 
