@@ -126,15 +126,10 @@ async function taskList() {
                 if ([4, 5].includes(task.task_id)) {
                     continue;
                 }
-                const taskCopy = {...task};
                 for (let i = 0; i < task.limit - task.done; i++) {
-                    await performTask(taskCopy);
+                    await performTask(task);
                 }
-                message += `【${taskCopy.title}】已完成${taskCopy.done}/${taskCopy.limit}\n`;
-                const index = tasks.findIndex(t => t.task_id === task.task_id);
-                if (index !== -1) {
-                    tasks[index] = taskCopy;
-                }
+                message += `【${task.title}】已完成${task.done}/${task.limit}\n`;
             }
         }
     }
