@@ -27,10 +27,6 @@
 
 多个消息平台（Telegram、Server 酱、Bark、PushPlus、钉钉等）服务推送。
 
-PS：最近发现掘金社区多了个成长等级，感觉可以写一写，有时间的话
-
-![images](https://raw.githubusercontent.com/sudojia/scripts/master/img/20220927111138.jpg)
-
 ## 😍特点
 
 - ~~💰~~ 免费（项目运行在 GitHub Actions 上.）
@@ -56,7 +52,15 @@ PS：最近发现掘金社区多了个成长等级，感觉可以写一写，有
 
 > 需要使用哪个就使用哪个的变量
 
-### SSPANEL
+### 掘金社区
+
+|      Name       |           Value            |                             说明                             |
+| :-------------: | :------------------------: | :----------------------------------------------------------: |
+| `JUEJIN_COOKIE` | eg:  `xxxxxxxxxxxxxxxxxxx` | 掘金 Cookie，打开[掘金社区](https://juejin.cn/) F12，选择 Application，点击 Cookies<br>只要 `sessionid` 的值并填入 Secrets 即可，多个掘金号用 `&` 隔开<br>eg: `xxxxxxxx&xxxxxxxx` |
+
+![images](https://img2.imgtp.com/2024/05/19/M3EbSqId.png)
+
+### SSPANEL面板
 
 |      Name       |                      Value                      |                             说明                             |
 | :-------------: | :---------------------------------------------: | :----------------------------------------------------------: |
@@ -67,14 +71,6 @@ PS：最近发现掘金社区多了个成长等级，感觉可以写一写，有
 1. SSPANEL 签到暂不支持密码带  `,`  与  `:`  的字符！
 2. **<font color='red'>SSPANEL 签到暂不支持带有图形验证码的机场网站！</font>**
 3. 如果你使用 Telegram 进行消息推送，那么在 Bot 创建后需要先给 Bot 发送一条消息，Bot 才能给用户发消息 [issues#9](https://github.com/sudojia/scripts/issues/9)
-
-### 掘金
-
-|      Name       |           Value            |                             说明                             |
-| :-------------: | :------------------------: | :----------------------------------------------------------: |
-| `JUEJIN_COOKIE` | eg:  `xxxxxxxxxxxxxxxxxxx` | 掘金 Cookie，打开[掘金社区](https://juejin.cn/) F12，选择 Application，点击 Cookies<br>只要 `sessionid` 的值并填入 Secrets 即可，多个掘金号用 `&` 隔开<br>eg: `xxxxxxxx&xxxxxxxx` |
-
-![images](https://img2.imgtp.com/2024/05/19/M3EbSqId.png)
 
 ### 获取 Steam 两周内游玩详情
 
@@ -199,6 +195,7 @@ https://xxxxx.com@SgL6_2132_auth=xxxxxxxxxxx;SgL6_2132_saltkey=xxxxxx&https://xx
 
 |    时间    |                             事件                             |
 | :--------: | :----------------------------------------------------------: |
+| 2024-05-21 | 掘金社区大更新<br>1. 添加了成长等级自动任务、目前只写了社区活跃下的任务<br>2. 移动端每日登录访问和发布文章任务有时间再写 |
 | 2024-05-20 |                      新增司机社签到脚本                      |
 | 2024-05-18 |                新增阿里云盘、百度贴吧签到脚本                |
 | 2024-05-17 |               脚本库优化并使用 axios 发送请求                |
