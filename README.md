@@ -15,7 +15,6 @@
 - [😍特点](#特点)
 - [👗适用人群](#适用人群)
 - [🔑*Env*](#Env)
-- [⚠️注意事项](#%EF%B8%8F注意事项)
 - [🔛使用](#使用)
 - [🎯TODO](#TODO)
 - [⭐点个 Star 支持作者](#点个-star-支持作者)
@@ -63,6 +62,12 @@ PS：最近发现掘金社区多了个成长等级，感觉可以写一写，有
 | :-------------: | :---------------------------------------------: | :----------------------------------------------------------: |
 | `SITE_ACCOUNTS` | 要执行签到的`网站,账号:密码`，多个请用 `&` 分割 | 单账号填写规则 e.g：`https://paolu.com,aaa@gmail.com:123456`<br/>多个填写规则：`https://aaa.com,aaa@gmail.com:aaa&https://bbb.com,bbb@gmail.com:bbb&...以此类推`<br/>中文说明：`网站,账号:密码`，多个：`网站,账号:密码&网站,账号:密码`<br/>网站与账号密码之间用`英文逗号`（`,`）分割，账号与密码之间用`英文冒号`（`:`）分割 |
 
+**说明**
+
+1. SSPANEL 签到暂不支持密码带  `,`  与  `:`  的字符！
+2. **<font color='red'>SSPANEL 签到暂不支持带有图形验证码的机场网站！</font>**
+3. 如果你使用 Telegram 进行消息推送，那么在 Bot 创建后需要先给 Bot 发送一条消息，Bot 才能给用户发消息 [issues#9](https://github.com/sudojia/scripts/issues/9)
+
 ### 掘金
 
 |      Name       |           Value            |                             说明                             |
@@ -108,6 +113,30 @@ JSON.parse(localStorage.token).refresh_token
 
 ![images](https://img2.imgtp.com/2024/05/19/HnlsgpaF.png)
 
+### 司机社
+
+|     Name     |          Value          |                             说明                             |
+| :----------: | :---------------------: | :----------------------------------------------------------: |
+| `SJS_COOKIE` | eg: `司机社网站@cookie` | 打开司机社网站，F12，选择 Application，点击 Cookies<br/>获取键值对：`SgL6_2132_auth=xxxxxxxxxxx;SgL6_2132_saltkey=xxxxxx` |
+
+**说明：**
+
+由于司机社分站有很多，所以任意选择一个网站登录之后，获取 `SgL6_2132_auth` 和 `SgL6_2132_saltkey` 的值即可（包括键也要填写）
+
+网站和 cookie 之间用 `@` 隔开，多个账号用 `&` 隔开。第二个键值对就不要加 `;` 了
+
+单个填写示例：
+
+```markdown
+https://xxxxx.com@SgL6_2132_auth=xxxxxxxxxxx;SgL6_2132_saltkey=xxxxxx
+```
+
+多个填写示例：用 `&` 隔开
+
+```markdown
+https://xxxxx.com@SgL6_2132_auth=xxxxxxxxxxx;SgL6_2132_saltkey=xxxxxx&https://xxxxx.com@SgL6_2132_auth=xxxxxxxxxxx;SgL6_2132_saltkey=xxxxxx
+```
+
 ### 消息推送变量（可选）
 
 如果你想要程序执行后进行消息推送，那么任选一种或多种方式进行配置
@@ -125,12 +154,6 @@ JSON.parse(localStorage.token).refresh_token
 |  `IGOT_PUSH_KEY`  |                          iGot 推送                           | 非必须 | iGot 聚合推送，支持多方式推送，确保消息可达。 [参考文档](https://wahao.github.io/Bark-MP-helper ) |
 | `PUSH_PLUS_TOKEN` |                        pushplus 推送                         | 非必须 | 微信扫码登录后一对一推送或一对多推送下面的 token(您的 Token)<br>[官方网站](http://www.pushplus.plus/) |
 | `PUSH_PLUS_USER`  |                        pushplus 推送                         | 非必须 | 一对多推送的 “群组编码”（一对多推送下面 -> 您的群组(如无则新建)->群组编码）<br>注：(1、需订阅者扫描二维码  2、如果您是创建群组所属人，也需点击“查看二维码”扫描绑定，否则不能接受群组消息推送)<br>只填 `PUSH_PLUS_TOKEN` 默认为一对一推送 |
-
-## ⚠️注意事项
-
-1. SSPANEL 签到暂不支持密码带  `,`  与  `:`  的字符！
-2. **<font color='red'>SSPANEL 签到暂不支持带有图形验证码的机场网站！</font>**
-3. 如果你使用 Telegram 进行消息推送，那么在 Bot 创建后需要先给 Bot 发送一条消息，Bot 才能给用户发消息 [issues#9](https://github.com/sudojia/scripts/issues/9)
 
 ## 🔛使用
 
