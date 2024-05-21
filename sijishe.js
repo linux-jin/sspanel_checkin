@@ -9,7 +9,7 @@ const notify = $.isNode() ? require('./sendNotify') : '';
 const axios = require('axios').default;
 const cheerio = require('cheerio');
 if (!process.env.SJS_COOKIE) {
-    console.error('请填写司机社 Cookie!');
+    console.error('请填写司机社环境变量【SJS_COOKIE】!');
     process.exit(1);
 }
 const siJiSheList = process.env.SJS_COOKIE.split('&').map(urlWithCookie => {
