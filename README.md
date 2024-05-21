@@ -23,27 +23,23 @@
 
 ## 💍介绍
 
-基于 GitHub Actions 每天定时自动签到脚本，支持多账号，目前仅支持 `SSPANEL` 、[掘金社区](https://juejin.cn/)
+这是一个基于 GitHub Actions 的自动化脚本，旨在每天定时自动执行签到任务。
 
-多个消息平台（Telegram、Server 酱、Bark、PushPlus、钉钉等）服务推送。
+该脚本支持多个账号，并且可以将签到结果通过多种消息平台（如 Telegram、Server 酱、Bark、PushPlus、钉钉等）进行推送通知。
 
 ## 😍特点
 
-- ~~💰~~ 免费（项目运行在 GitHub Actions 上.）
-- 🔗 多网站
-- 📯 多账号
+- ~~💰~~ 免费（由于脚本运行在 GitHub Actions 上，因此无需支付额外费用即可使用。）
+- 🔗 多网站（脚本设计为支持多个不同的网站签到）
+- 📯 多账号（用户可以配置多个账号进行签到）
 
 ## 👗适用人群
 
-- 老少皆宜
+对于经常访问和使用掘金、百度贴吧、阿里云盘等互联网服务的用户，这些脚本能够自动化日常签到、抽奖和等级成长任务，帮助用户保持活跃状态，避免因断签而影响账号状态。
 
-- 有这个需求的人
+对于机场使用 SSPANEL 的网站，这些脚本可以自动处理断签情况，避免因断签导致的账号被清理，确保用户能够持续享受服务。
 
-- SSPANEL 断签 7 天或者断签某天就会把你号给删的那种 ✈️
-
-  ![images](https://cdn.jsdelivr.net/gh/sudojia/sspanel_checkin/img/fources.jpg)
-  
-- 掘金签到获取矿石，用于抽奖、兑换！
+![images](https://cdn.jsdelivr.net/gh/sudojia/sspanel_checkin/img/fources.jpg)
 
 
 ## 🔑*Env*
