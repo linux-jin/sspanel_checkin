@@ -9,7 +9,7 @@
 const $ = require('./env').Env('掘金自动签到');
 const notify = $.isNode() ? require('./sendNotify') : '';
 const axios = require('axios').default;
-let cookiesArr = (process.env.JUEJIN_COOKIE || '').split('&'), message = '';
+let cookiesArr = process.env.JUEJIN_COOKIE ? process.env.SITE_ACCOUNTS.split('&') : [], message = '';
 const config = {
     // 掘金 API
     JUEJIN_API: 'https://api.juejin.cn',
@@ -30,7 +30,7 @@ const taskTypes = {
     11: '关注掘友任务',
     12: '收藏文章任务'
 };
-if (!Array.isArray(cookiesArr) || cookiesArr.length === 0) {
+if (!cookiesArr || cookiesArr.length === 0) {
     console.log('请设置环境变量【JUEJIN_COOKIE】\n');
     process.exit(1);
 }
