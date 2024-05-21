@@ -84,6 +84,8 @@ async function main() {
     } else {
         await luckyDraw();
     }
+    await $.wait(1000);
+    await geMyLucky();
     console.log('开始执行十连抽...')
     message += `【十连抽详情】\n`
     if (!config.ENABLE_TEN_DRAW) {
@@ -676,6 +678,18 @@ async function getCount() {
 async function luckyDraw() {
     const data = await sendRequest(config.JUEJIN_API + '/growth_api/v1/lottery/draw', 'post', '');
     message += `【抽奖信息】抽中了${data.data.lottery_name}\n`;
+}
+
+/**
+ * 获取幸运值
+ *
+ * @returns {Promise}
+ */
+async function geMyLucky() {
+    const data = await sendRequest(config.JUEJIN_API + '/growth_api/v1/lottery_lucky/my_lucky', 'post', {});
+    if ('success' === data.err_msg) {
+        message += `【当前幸运值】${data.data.total_value}/6000\n`
+    }
 }
 
 /**
