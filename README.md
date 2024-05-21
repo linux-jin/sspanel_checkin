@@ -129,6 +129,14 @@ https://xxxxx.com@SgL6_2132_auth=xxxxxxxxxxx;SgL6_2132_saltkey=xxxxxx
 https://xxxxx.com@SgL6_2132_auth=xxxxxxxxxxx;SgL6_2132_saltkey=xxxxxx&https://xxxxx.com@SgL6_2132_auth=xxxxxxxxxxx;SgL6_2132_saltkey=xxxxxx
 ```
 
+### V2EX
+
+|     Name      | Value  |                             说明                             |
+| :-----------: | :----: | :----------------------------------------------------------: |
+| `V2EX_COOKIE` | Cookie | F12，选择 Network 网络，然后请求选择 `Doc`，把 Cookie 全选复制<br>没有出现 `v2ex.com` 那就 F5 刷新一下 |
+
+![v2ex](https://img2.imgtp.com/2024/05/22/Ce612EwM.png)
+
 ### 消息推送变量（可选）
 
 如果你想要程序执行后进行消息推送，那么任选一种或多种方式进行配置
@@ -191,6 +199,7 @@ https://xxxxx.com@SgL6_2132_auth=xxxxxxxxxxx;SgL6_2132_saltkey=xxxxxx&https://xx
 
 |    时间    |                             事件                             |
 | :--------: | :----------------------------------------------------------: |
+| 2024-05-22 |                      新增 V2EX 签到脚本                      |
 | 2024-05-21 | 掘金社区大更新<br>1. 添加了成长等级自动任务、目前只写了社区活跃下的任务<br>2. 移动端每日登录访问和发布文章任务有时间再写 |
 | 2024-05-20 |                      新增司机社签到脚本                      |
 | 2024-05-18 |                新增阿里云盘、百度贴吧签到脚本                |
