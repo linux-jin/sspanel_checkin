@@ -9,7 +9,7 @@
 const $ = require('./env').Env('掘金自动签到');
 const notify = $.isNode() ? require('./sendNotify') : '';
 const axios = require('axios').default;
-let cookiesArr = process.env.JUEJIN_COOKIE ? process.env.SITE_ACCOUNTS.split('&') : [], message = '';
+let cookiesArr = process.env.JUEJIN_COOKIE ? process.env.JUEJIN_COOKIE.split('&') : [], message = '';
 const config = {
     // 掘金 API
     JUEJIN_API: 'https://api.juejin.cn',
