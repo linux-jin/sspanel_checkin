@@ -46,6 +46,8 @@
 
 `Settings - Secrets - New repository secret`
 
+后面的 `eg` 是示例的意思，填的时候不要把 eg 也填进去了。。。
+
 > 需要使用哪个就使用哪个的变量
 
 ### 掘金社区
