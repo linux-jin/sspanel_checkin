@@ -115,10 +115,10 @@ async function main() {
  * @returns {Promise<void>}
  */
 async function taskList() {
-    const data = await sendRequest(config.JUEJIN_API + '/growth_api/v1/user_growth/task_list', 'post', {
+    let data = await sendRequest(config.JUEJIN_API + '/growth_api/v1/user_growth/task_list', 'post', {
         growth_type: 1
     });
-    const growthTasks = data.data.growth_tasks;
+    let growthTasks = data.data.growth_tasks;
     for (const taskArray in growthTasks) {
         // 1没任务，3社区学习，4社区影响力，5社区活跃、暂时做社区活跃任务
         if (growthTasks.hasOwnProperty(taskArray) && '5' === taskArray) {
@@ -131,11 +131,27 @@ async function taskList() {
                 for (let i = 0; i < task.limit - task.done; i++) {
                     await performTask(task);
                 }
-                message += `【${task.title}】已完成${task.done}/${task.limit}\n`;
             }
         }
     }
-    message += `【今日掘友分】+${data.data.today_jscore}\n`
+    await $.wait(2000);
+    // 任务完成后重新调用接口更新任务状态
+    data = await sendRequest(config.JUEJIN_API + '/growth_api/v1/user_growth/task_list', 'post', {
+        growth_type: 1
+    });
+    growthTasks = data.data.growth_tasks;
+    Object.entries(growthTasks).forEach(([growthId, tasks]) => {
+        if (['1', '3', '4'].includes(growthId)) {
+            return;
+        }
+        tasks = tasks.filter(task => task.task_id !== 4 && task.task_id !== 5);
+        if (tasks && tasks.length > 0) {
+            tasks.forEach(t => {
+                message += `【${t.title}】已完成${t.done}/${t.limit}\n`;
+            });
+            message += `【今日掘友分】+${data.data.today_jscore}\n`
+        }
+    });
 }
 
 /**
