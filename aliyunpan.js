@@ -38,8 +38,8 @@ async function main(refreshToken) {
     const accessToken = await getAccessToken(refreshToken);
     await $.wait(1000);
     const signInCount = await AliSignIn(refreshToken, accessToken);
-    await $.wait(1000);
-    await getReward(accessToken, signInCount);
+    // await $.wait(1000);
+    // await getReward(accessToken, signInCount);
 }
 
 /**
@@ -125,6 +125,6 @@ async function sendRequest(url, method, data = {}, header = {}) {
         // 只要请求出错那就推送消息提示下可能是 refresh_token 失效了
         console.log("请求失败：", error);
         console.log(`\n阿里账号【${$.index}】请求接口异常, 可能是 refresh_token 失效了, 请重新获取 refresh_token`)
-        await notify.sendNotify(`「阿里云盘签到报告」`, `\n\n阿里账号【${$.index}】请求接口异常, 可能是 refresh_token 失效了, 请重新获取 refresh_token`);
+        await notify.sendNotify(`「阿里云盘Cookie失效通知」`, `\n\n阿里账号【${$.index}】请求接口异常, 可能是 refresh_token 失效了, 请重新获取 refresh_token`);
     }
 }
