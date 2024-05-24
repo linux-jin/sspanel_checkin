@@ -385,7 +385,7 @@ async function getBoilingId() {
         id_type: 4,
         sort_type: 300,
         cursor: "0",
-        limit: 50 // 20 条沸点id
+        limit: 20
     });
     for (let item of data.data) {
         boilingList.push(item.msg_id)
@@ -524,7 +524,7 @@ async function cancelSave(itemId, itemType = 2) {
  */
 async function getAuthorList() {
     const userList = [];
-    const data = await sendRequest(config.JUEJIN_API + '/user_api/v1/author/recommend?limit=100', 'get');
+    const data = await sendRequest(config.JUEJIN_API + '/user_api/v1/author/recommend?limit=20', 'get');
     for (let user of data.data) {
         userList.push(user.user_id);
     }
