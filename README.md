@@ -99,6 +99,8 @@ JSON.parse(localStorage.token).refresh_token
 
 两种方式任选一种获取 `Referesh Token `
 
+**5.22**：抓包发现获取奖励的接口请求头多了签名算法，本人能力有限，暂时移除了获取奖励接口，仅支持签到！
+
 ### 百度贴吧
 
 |      Name       |                Value                |                             说明                             |
