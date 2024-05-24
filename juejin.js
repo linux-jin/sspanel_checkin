@@ -57,17 +57,25 @@ async function main() {
     // 任务列表
     console.log('开始做社区活跃任务...')
     console.log('时间稍长、请耐心等待')
+    const startTime = new Date().getTime();
     await taskList();
-    await $.wait(2000);
+    const endTime = new Date().getTime();
+    const timeElapsedMs = endTime - startTime;
+    const timeElapsedSec = Math.floor(timeElapsedMs / 1000);
+    const timeElapsedMin = Math.floor(timeElapsedSec / 60);
+    const remainingSec = timeElapsedSec % 60;
+    console.log(`社区活跃任务已完成\n共耗时：${timeElapsedMin}分${remainingSec}秒\n等待五秒...`);
+    await $.wait(5000);
     await getUserName();
     await $.wait(1000);
+    console.log(`开始做每日签到任务...`);
     await checkIn();
-    await $.wait(1000);
+    await $.wait(3000);
     const oreNum = await getOreNum();
     message += `【总矿石数】${oreNum} 矿石\n`
     // 签到统计
     await getCount();
-    await $.wait(1000);
+    await $.wait(2000);
     const freeCount = await queryFreeLuckyDrawCount();
     if (freeCount === 0) {
         console.log(`白嫖次数已用尽~暂不抽奖\n`)
@@ -75,7 +83,7 @@ async function main() {
     } else {
         await luckyDraw();
     }
-    await $.wait(1000);
+    await $.wait(2000);
     await geMyLucky();
     console.log('开始执行十连抽...')
     message += `【十连抽详情】\n`
@@ -95,7 +103,7 @@ async function main() {
     for (let i = 0; i < config.TEN_DRAW_NUM; i++) {
         await tenDraw();
         if (i < config.TEN_DRAW_NUM - 1) {
-            await $.wait(1000);
+            await $.wait(2200);
         }
     }
 }
@@ -559,21 +567,24 @@ async function checkIn() {
 async function getUserName() {
     const data = await sendRequest(config.JUEJIN_API + '/user_api/v1/user/get', 'get', '')
     // 用户昵称
-    let userName = data.data.user_name;
+    const userName = data.data.user_name;
     // 获取等级
-    let jscoreLevel = data.data.user_growth_info.jscore_level;
+    const jscoreLevel = data.data.user_growth_info.jscore_level;
     // 获取等级称号
-    let jscoreTitle = data.data.user_growth_info.jscore_title;
+    const jscoreTitle = data.data.user_growth_info.jscore_title;
     // 下一等级的分数
-    let jscoreNextLevelScore = data.data.user_growth_info.jscore_next_level_score;
+    const jscoreNextLevelScore = data.data.user_growth_info.jscore_next_level_score;
     // 掘友分
-    let jscore = data.data.user_growth_info.jscore;
+    const jscore = data.data.user_growth_info.jscore;
+    // 剩余掘友分
+    const remainingJsScore = Math.round((jscoreNextLevelScore - jscore) * 10) / 10;
+    // 升级天数
+    const needUpgradeDay = Math.ceil(remainingJsScore / $.getEveryDayJscore);
     if (jscoreLevel === 8) {
         message += `【账号昵称】${userName}\n【等级详情】满级大佬\n`;
         return;
     }
-    message += `【账号昵称】${userName}\n【等级详情】${jscoreTitle}(${jscoreLevel}级), 掘友分: ${jscore}, 还需${jscoreNextLevelScore - jscore}分可升至掘友${jscoreLevel + 1}级\n
-    【升级天数】还需 ${(jscoreNextLevelScore - jscore) / $.getEveryDayJscore} 天\n`;
+    message += `【账号昵称】${userName}\n【等级详情】${jscoreTitle}(${jscoreLevel}级), 掘友分: ${jscore}, 还需${remainingJsScore}分可升至掘友${jscoreLevel + 1}级\n【升级天数】还需 ${needUpgradeDay} 天\n`;
 }
 
 /**
@@ -643,7 +654,7 @@ async function tenDraw() {
     for (let draw of $.lotteryBases) {
         message += `抽中了${draw.lottery_name}\n`
         console.log(`抽中了${draw.lottery_name}`)
-        await $.wait(1000);
+        await $.wait(1500);
     }
     // 当前幸运值
     let totalLuckyValue = data.data.total_lucky_value;
