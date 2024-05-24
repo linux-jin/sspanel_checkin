@@ -19,17 +19,6 @@ const config = {
     TEN_DRAW_NUM: parseInt(process.env.TEN_DRAW_NUM) || 1,
     COOKIE: ''
 };
-// 定义任务类型对应的任务名称
-// 移动端每日登录访问和发布文章没写
-const taskTypes = {
-    6: '发布沸点任务',
-    7: '评论文章任务',
-    8: '评论沸点任务',
-    9: '点赞文章任务',
-    10: '点赞沸点任务',
-    11: '关注掘友任务',
-    12: '收藏文章任务'
-};
 if (!cookiesArr || cookiesArr.length === 0) {
     console.log('请设置环境变量【JUEJIN_COOKIE】\n');
     process.exit(1);
@@ -66,6 +55,8 @@ if (!cookiesArr || cookiesArr.length === 0) {
 async function main() {
     message += `「社区活跃任务详情」\n`
     // 任务列表
+    console.log('开始做社区活跃任务...')
+    console.log('时间稍长、请耐心等待')
     await taskList();
     await $.wait(2000);
     await getUserName();
@@ -165,148 +156,111 @@ async function performTask(task) {
     const postId = await getPostId();
     // 获取沸点id
     const msgId = await getBoilingId();
-    const taskType = taskTypes[task.task_id] || '未知任务';
     switch (task.task_id) {
         case 6:
-            await performPublishBoilingTask(taskType);
+            await performPublishBoilingTask();
             break;
         case 7:
-            await performCommentArticleTask(taskType, postId);
+            await performCommentArticleOrBoilingTask(postId);
             break;
         case 8:
-            await performBoilingCommentTask(taskType, msgId);
+            await performCommentArticleOrBoilingTask(msgId, false);
             break;
         case 9:
-            await performLikeArticleTask(taskType, postId);
+            await performLikeArticleTaskOrBoilingTask(postId);
             break;
         case 10:
-            await performLikeBoilingTask(taskType, msgId);
+            await performLikeArticleTaskOrBoilingTask(msgId, false);
             break;
         case 11:
-            await performFollowTask(taskType);
+            await performFollowTask();
             break;
         case 12:
-            await performCollectArticleTask(taskType, postId);
+            await performCollectArticleTask(postId);
             break;
     }
 }
 
 /**
- * 执行发布沸点任务
+ * 执行发布沸点任务 6
  *
- * @param taskType
  * @returns {Promise<void>}
  */
-async function performPublishBoilingTask(taskType) {
+async function performPublishBoilingTask() {
     const content = await getWenAn()
-    console.log(`开始${taskType}\n等待3秒...`)
-    await $.wait(1000);
+    await $.wait(2000);
     const msgId = await publishBoiling(content)
-    console.log(`开始删除沸点\n等待10秒...`)
-    await $.wait(10000);
+    await $.wait(20000);
     await deleteBoiling(msgId);
 }
 
 /**
- * 执行收藏文章任务
+ * 执行评论文章任务 7 And 8
  *
- * @param taskType 任务类型
- * @param postId 文章id
- *
+ * @param itemId 文章id或沸点id
+ * @param isArticle true：文章，false：沸点
  * @returns {Promise<void>}
  */
-async function performCollectArticleTask(taskType, postId) {
-    const collectionId = await getCollectionList(postId);
-    await $.wait(1300);
-    // 添加文章到收藏夹
-    console.log(`开始${taskType}\n等待3秒...`)
-    await $.wait(3000);
-    await addPostToCollection(postId, collectionId);
-    console.log(`开始取消收藏文章\n等待3秒...`)
-    await $.wait(3000);
-    await deletePostFromCollection(postId)
+async function performCommentArticleOrBoilingTask(itemId, isArticle = true) {
+    await $.wait(5000);
+    const ArticleOrBoilingCommentId = isArticle ? await commentPublish(itemId) : await commentPublish(itemId, 4);
+    if (isArticle) {
+        await $.wait(3000);
+        // 执行文章评论删除
+        await deleteComment(ArticleOrBoilingCommentId);
+    } else {
+        await $.wait(3000);
+        await deleteComment(ArticleOrBoilingCommentId);
+    }
 }
 
 /**
- * 执行关注任务
+ * 执行点赞文章或沸点任务 9 And 10
  *
- * @param taskType
+ * @param itemId 文章id或沸点id
+ * @param isArticle true：文章，false：沸点
  * @returns {Promise<void>}
  */
-async function performFollowTask(taskType) {
-    console.log(`开始${taskType}\n等待3秒...`)
+async function performLikeArticleTaskOrBoilingTask(itemId, isArticle = true) {
+    await $.wait(3000);
+    if (isArticle) {
+        await _saveOrCancel(itemId, 2);
+        await $.wait(3000);
+        await _saveOrCancel(itemId, 2, false);
+    } else {
+        await _saveOrCancel(itemId, 4);
+        await $.wait(3000);
+        await _saveOrCancel(itemId, 4, false);
+    }
+}
+
+/**
+ * 执行关注任务 11
+ *
+ * @returns {Promise<void>}
+ */
+async function performFollowTask() {
     await $.wait(3000);
     const userId = await getAuthorList();
-    await $.wait(1300);
+    await $.wait(3000);
     await followAuthorAndCancel(userId);
-    console.log(`开始取关掘友\n等待3秒...`)
     await $.wait(3000);
     await followAuthorAndCancel(userId, 1);
 }
 
 /**
- * 执行点赞沸点任务
+ * 执行收藏文章任务 12
  *
- * @param taskType 任务类型
- * @param msgId
- * @returns {Promise<void>}
- */
-async function performLikeBoilingTask(taskType, msgId) {
-    console.log(`开始${taskType}\n等待5秒...`)
-    await $.wait(5000);
-    await save(msgId, 4);
-    console.log(`开始取消点赞沸点\n等待5秒...`)
-    await $.wait(5000);
-    await cancelSave(msgId, 4);
-}
-
-/**
- * 执行点赞文章任务
- *
- * @param taskType 任务类型
  * @param postId 文章id
  * @returns {Promise<void>}
  */
-async function performLikeArticleTask(taskType, postId) {
-    console.log(`开始${taskType}\n等待5秒...`);
+async function performCollectArticleTask(postId) {
     await $.wait(5000);
-    await save(postId);
-    console.log(`开始取消点赞文章\n等待5秒...`)
+    const collectionId = await getCollectionList(postId);
+    await $.wait(3000);
+    await addPostToCollection(postId, collectionId);
     await $.wait(5000);
-    await cancelSave(postId)
-}
-
-/**
- * 执行沸点评论任务
- *
- * @param taskType 任务类型
- * @param msgId
- * @returns {Promise<void>}
- */
-async function performBoilingCommentTask(taskType, msgId) {
-    console.log(`开始${taskType}\n等待5秒...`);
-    await $.wait(5000);
-    const boilingCommentId = await commentPublish(msgId, 4);
-    console.log(`开始删除沸点评论...\n等待5秒...`);
-    await $.wait(5000);
-    await deleteComment(boilingCommentId);
-}
-
-/**
- * 执行评论文章任务
- *
- * @param taskType 任务类型
- * @param postId
- * @returns {Promise<void>}
- */
-async function performCommentArticleTask(taskType, postId) {
-    console.log(`开始${taskType}\n等待5秒...`);
-    await $.wait(5000);
-    // 获取评论id
-    const commentId = await commentPublish(postId);
-    console.log(`开始删除评论...\n等待5秒`)
-    await $.wait(5000);
-    await deleteComment(commentId);
+    await deletePostFromCollection(postId)
 }
 
 /**
@@ -390,7 +344,7 @@ async function getBoilingId() {
     for (let item of data.data) {
         boilingList.push(item.msg_id)
     }
-    return boilingList[Math.floor(Math.random() * 50) + 1];
+    return boilingList[Math.floor(Math.random() * 20) + 1];
 }
 
 /**
@@ -417,27 +371,34 @@ async function publishBoiling(content, retryCount = 0) {
         sync_to_org: false
     });
     if (2002 === data.err_no && retryCount < 5) {
-        console.log(`沸点内容过少，重试第${retryCount + 1}次`)
+        console.log(`沸点内容过少，正在重新生成文案重新发布...\n重试第${retryCount + 1}次`)
         return publishBoiling(content, retryCount + 1);
     }
     if ('success' === data.err_msg) {
-        console.log('发布沸点成功！');
         return data.data.msg_id;
     }
     return -1;
 }
 
 /**
- * 删除沸点
+ * 删除沸点内容
+ * 与下面的删除评论可以实现共用、懒得改了，没什么技术含量
  *
  * @param msgId 沸点id
  * @returns {Promise<void>}
  */
 async function deleteBoiling(msgId) {
     const data = await sendRequest(config.JUEJIN_API + '/content_api/v1/short_msg/delete', 'post', {msg_id: msgId});
-    if ('success' === data.err_msg) {
-        console.log('删除沸点成功！')
-    }
+}
+
+/**
+ * 删除评论
+ *
+ * @param commentId 评论id
+ * @returns {Promise<void>}
+ */
+async function deleteComment(commentId) {
+    const data = await sendRequest(config.JUEJIN_API + '/interact_api/v1/comment/delete', 'post', {comment_id: commentId});
 }
 
 /**
@@ -459,63 +420,32 @@ async function commentPublish(itemId, itemType = 2) {
         comment_pics: []
     });
     if ('success' === data.err_msg) {
-        console.log('评论成功！');
         return data.data.comment_id;
     }
 }
 
 /**
- * 删除评论
- *
- * @param commentId 评论id
- * @returns {Promise<void>}
- */
-async function deleteComment(commentId) {
-    const data = await sendRequest(config.JUEJIN_API + '/interact_api/v1/comment/delete', 'post', {
-        comment_id: commentId,
-    });
-    if ('success' === data.err_msg) {
-        console.log('删除评论成功！');
-    }
-}
-
-/**
- * 点赞
+ * 点赞和取消点赞的共用实现
  *
  * @param itemId 文章id或者沸点id
  * @param itemType 2 文章 4 沸点
- *
+ * @param isSave 点赞时为true，取消点赞时为false
  * @returns {Promise<void>}
  */
-async function save(itemId, itemType = 2) {
-    const data = await sendRequest(config.JUEJIN_API + '/interact_api/v1/digg/save', 'post', {
-        item_id: itemId,
-        item_type: itemType,
-        client_type: 2608
-    });
-    if ('success' === data.err_msg) {
-        console.log('点赞成功');
+async function _saveOrCancel(itemId, itemType = 2, isSave = true) {
+    const apiUrl = isSave ? '/save' : '/cancel';
+    try {
+        const data = await sendRequest(`${config.JUEJIN_API}/interact_api/v1/digg/${apiUrl}`, 'post', {
+            item_id: itemId,
+            item_type: itemType,
+            client_type: 2608
+        });
+    } catch (error) {
+        console.error(`请求失败： ${isSave ? 'save' : 'cancel save'}:`, error);
+        throw error;
     }
 }
 
-/**
- * 取消点赞
- *
- * @param itemId 文章id或者沸点id
- * @param itemType 2 文章 4 沸点
- *
- * @returns {Promise<void>}
- */
-async function cancelSave(itemId, itemType = 2) {
-    const data = await sendRequest(config.JUEJIN_API + '/interact_api/v1/digg/cancel', 'post', {
-        item_id: itemId,
-        item_type: itemType,
-        client_type: 2608
-    });
-    if ('success' === data.err_msg) {
-        console.log(`取消点赞成功！`);
-    }
-}
 
 /**
  * 获取掘友列表
@@ -528,7 +458,7 @@ async function getAuthorList() {
     for (let user of data.data) {
         userList.push(user.user_id);
     }
-    return userList[Math.floor(Math.random() * 99) + 1];
+    return userList[Math.floor(Math.random() * 20) + 1];
 }
 
 /**
@@ -548,9 +478,6 @@ async function followAuthorAndCancel(userId, type = 0) {
         id: userId,
         type: 1
     });
-    if ('success' === data.err_msg) {
-        console.log(type === 1 ? '取关掘友成功！' : '关注掘友成功！');
-    }
 }
 
 /**
@@ -583,9 +510,6 @@ async function addPostToCollection(postId, collectionId) {
         unselect_collection_ids: [],
         is_collect_fast: false
     });
-    if ('success' === data.err_msg) {
-        console.log('收藏文章成功！');
-    }
 }
 
 /**
@@ -599,9 +523,6 @@ async function deletePostFromCollection(postId) {
     const data = await sendRequest(config.JUEJIN_API + '/interact_api/v2/collectionset/delete_article', 'post', {
         article_id: postId
     });
-    if ('success' === data.err_msg) {
-        console.log('取消收藏成功！');
-    }
 }
 
 /**
