@@ -141,6 +141,8 @@ async function taskList() {
                 message += `【${t.title}】已完成${t.done}/${t.limit}\n`;
             });
             message += `【今日掘友分】+${data.data.today_jscore}\n`
+            // 每日获取的积分
+            $.getEveryDayJscore = data.data.today_jscore;
         }
     });
 }
@@ -570,7 +572,8 @@ async function getUserName() {
         message += `【账号昵称】${userName}\n【等级详情】满级大佬\n`;
         return;
     }
-    message += `【账号昵称】${userName}\n【等级详情】${jscoreTitle}(${jscoreLevel}级), 掘友分: ${jscore}, 还需${jscoreNextLevelScore - jscore}分可升至掘友${jscoreLevel + 1}级\n`;
+    message += `【账号昵称】${userName}\n【等级详情】${jscoreTitle}(${jscoreLevel}级), 掘友分: ${jscore}, 还需${jscoreNextLevelScore - jscore}分可升至掘友${jscoreLevel + 1}级\n
+    【升级天数】还需 ${(jscoreNextLevelScore - jscore) / $.getEveryDayJscore} 天\n`;
 }
 
 /**
