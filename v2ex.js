@@ -29,7 +29,7 @@ let message = '';
 
 async function main(cookie) {
     await getOnce(cookie)
-    await $.wait(1000);
+    await $.wait(Math.floor(Math.random() * (2000 - 1500 + 1)) + 1500);
     await getInfo(cookie)
 }
 
@@ -48,7 +48,7 @@ async function getOnce(cookie) {
     if (data.indexOf('每日登录奖励已领取') < 0) {
         console.log('开始签到...')
         const once = $('input[type="button"]')[0].attribs['onclick'].match(/once=(\d+)/)[1];
-        await $.wait(1000);
+        await $.wait(Math.floor(Math.random() * (2000 - 1500 + 1)) + 1500);
         await checkIn(once, cookie);
     } else {
         message += `【签到状态】已经签到过了\n`
