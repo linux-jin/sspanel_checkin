@@ -3,7 +3,7 @@
  * @site https://blog.imzjw.cn
  * @date 2022/01/19 21:26
  * @last Modified by Telegram@sudojia
- * @last Modified time 2024/05/21 03:39
+ * @last Modified time 2024/05/25
  * @description 掘金自动签到
  */
 const $ = require('./env').Env('掘金自动签到');
@@ -40,7 +40,7 @@ if (!cookiesArr || cookiesArr.length === 0) {
             console.error(`账号${index}发生异常: ${e}`);
         } finally {
             // 对每个账号的处理之间等待5秒
-            await $.wait(5000);
+            await $.wait(getRandomWait(4800, 5300));
         }
     }
     if (message) {
@@ -65,18 +65,18 @@ async function main(index) {
     const timeElapsedSec = Math.floor(timeElapsedMs / 1000);
     const timeElapsedMin = Math.floor(timeElapsedSec / 60);
     const remainingSec = timeElapsedSec % 60;
-    console.log(`社区活跃任务已完成\n共耗时：${timeElapsedMin}分${remainingSec}秒\n等待五秒...`);
-    await $.wait(5000);
+    console.log(`社区活跃任务已完成\n共耗时：${timeElapsedMin}分${remainingSec}秒\n等待五秒左右...`);
+    await $.wait(getRandomWait(4900, 5500));
     await getUserName();
-    await $.wait(1000);
+    await $.wait(getRandomWait(2300, 2700));
     console.log(`开始做每日签到任务...`);
     await checkIn();
-    await $.wait(3000);
+    await $.wait(getRandomWait(3000, 3500));
     const oreNum = await getOreNum();
     message += `【总矿石数】${oreNum} 矿石\n`
     // 签到统计
     await getCount();
-    await $.wait(2000);
+    await $.wait(getRandomWait(2200, 2600));
     const freeCount = await queryFreeLuckyDrawCount();
     if (freeCount === 0) {
         console.log(`白嫖次数已用尽~暂不抽奖\n`)
@@ -84,7 +84,7 @@ async function main(index) {
     } else {
         await luckyDraw();
     }
-    await $.wait(2000);
+    await $.wait(getRandomWait(2300, 2800));
     const currentLuckyValue = await geMyLucky();
     message += `【当前幸运值】${currentLuckyValue}/6000\n`
     console.log('开始执行十连抽...')
@@ -95,7 +95,7 @@ async function main(index) {
         return;
     }
     console.log(`检测到你已开启十连抽，正在为你执行十连抽...\n等待两秒...`);
-    await $.wait(2000);
+    await $.wait(getRandomWait(2100, 2500));
     if (2000 > oreNum) {
         message += `妈的，全部身家加起来矿石都不足 2000，还想十连抽???\n\n`
         console.log(`妈的，全部身家加起来矿石都不足 2000，还想十连抽???`);
@@ -109,7 +109,7 @@ async function main(index) {
         }
         // 多次十连抽后等待两秒
         if (config.TEN_DRAW_NUM > 1) {
-            await $.wait(Math.floor(Math.random() * 501) + 2200);
+            await $.wait(getRandomWait(2000, 3000));
         }
     }
 }
@@ -139,7 +139,7 @@ async function taskList() {
             }
         }
     }
-    await $.wait(2000);
+    await $.wait(getRandomWait(2500, 3000));
     // 任务完成后重新调用接口更新任务状态
     data = await sendRequest(config.JUEJIN_API + '/growth_api/v1/user_growth/task_list', 'post', {
         growth_type: 1
@@ -204,9 +204,9 @@ async function performTask(task) {
  */
 async function performPublishBoilingTask() {
     const content = await getWenAn()
-    await $.wait(2000);
+    await $.wait(getRandomWait(1800, 2200));
     const msgId = await publishBoiling(content)
-    await $.wait(20000);
+    await $.wait(getRandomWait(19000, 25000));
     await deleteBoiling(msgId);
 }
 
@@ -218,14 +218,14 @@ async function performPublishBoilingTask() {
  * @returns {Promise<void>}
  */
 async function performCommentArticleOrBoilingTask(itemId, isArticle = true) {
-    await $.wait(5000);
+    await $.wait(getRandomWait(5000, 5500));
     const ArticleOrBoilingCommentId = isArticle ? await commentPublish(itemId) : await commentPublish(itemId, 4);
     if (isArticle) {
-        await $.wait(3000);
+        await $.wait(getRandomWait(3300, 3700));
         // 执行文章评论删除
         await deleteComment(ArticleOrBoilingCommentId);
     } else {
-        await $.wait(3000);
+        await $.wait(getRandomWait(3600, 4500));
         await deleteComment(ArticleOrBoilingCommentId);
     }
 }
@@ -238,14 +238,14 @@ async function performCommentArticleOrBoilingTask(itemId, isArticle = true) {
  * @returns {Promise<void>}
  */
 async function performLikeArticleTaskOrBoilingTask(itemId, isArticle = true) {
-    await $.wait(3000);
+    await $.wait(getRandomWait(3800, 4300));
     if (isArticle) {
         await _saveOrCancel(itemId, 2);
-        await $.wait(3000);
+        await $.wait(getRandomWait(3500, 4200));
         await _saveOrCancel(itemId, 2, false);
     } else {
         await _saveOrCancel(itemId, 4);
-        await $.wait(3000);
+        await $.wait(getRandomWait(3600, 4500));
         await _saveOrCancel(itemId, 4, false);
     }
 }
@@ -256,11 +256,11 @@ async function performLikeArticleTaskOrBoilingTask(itemId, isArticle = true) {
  * @returns {Promise<void>}
  */
 async function performFollowTask() {
-    await $.wait(3000);
+    await $.wait(getRandomWait(3400, 4000));
     const userId = await getAuthorList();
-    await $.wait(3000);
+    await $.wait(getRandomWait(3500, 4100));
     await followAuthorAndCancel(userId);
-    await $.wait(3000);
+    await $.wait(getRandomWait(3600, 4200));
     await followAuthorAndCancel(userId, 1);
 }
 
@@ -271,11 +271,11 @@ async function performFollowTask() {
  * @returns {Promise<void>}
  */
 async function performCollectArticleTask(postId) {
-    await $.wait(5000);
+    await $.wait(getRandomWait(4800, 5200));
     const collectionId = await getCollectionList(postId);
-    await $.wait(3000);
+    await $.wait(getRandomWait(3800, 4500));
     await addPostToCollection(postId, collectionId);
-    await $.wait(5000);
+    await $.wait(getRandomWait(5000, 5500));
     await deletePostFromCollection(postId)
 }
 
@@ -660,7 +660,7 @@ async function tenDraw() {
     for (let draw of $.lotteryBases) {
         message += `抽中了${draw.lottery_name}\n`
         console.log(`抽中了${draw.lottery_name}`)
-        await $.wait(2000);
+        await $.wait(getRandomWait(2300, 2700));
     }
     // 当前幸运值
     let totalLuckyValue = data.data.total_lucky_value;
@@ -695,6 +695,18 @@ async function getLuckyDraw(index) {
     for (let i = 0; i < 3; i++) {
         await notify.sendNotify(`「获得实物推送」`, `掘金账号【${index}】抽中实物奖励: ${lotteryHistory.lottery_name} 获得时间: ${lotteryHistory.ctime}\n请速去填写地址获取！！！`);
     }
+}
+
+/**
+ * 随机等待时间
+ *
+ * @param min 最小值
+ * @param max 最大值
+ *
+ * @returns {*} 随机数
+ */
+function getRandomWait(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 /**
