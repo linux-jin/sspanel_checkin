@@ -29,7 +29,7 @@ let message = '';
 
 async function main(cookie) {
     await getOnce(cookie)
-    await $.wait(Math.floor(Math.random() * (2000 - 1500 + 1)) + 1500);
+    await wait();
     await getInfo(cookie)
 }
 
@@ -48,7 +48,7 @@ async function getOnce(cookie) {
     if (data.indexOf('每日登录奖励已领取') < 0) {
         console.log('开始签到...')
         const once = $('input[type="button"]')[0].attribs['onclick'].match(/once=(\d+)/)[1];
-        await $.wait(Math.floor(Math.random() * (2000 - 1500 + 1)) + 1500);
+        await wait();
         await checkIn(once, cookie);
     } else {
         message += `【签到状态】已经签到过了\n`
@@ -87,6 +87,9 @@ async function getInfo(cookie) {
     message += `【账户余额】${silverAmount}银币 ${bronzeAmount}铜币\n`
 }
 
+async function wait() {
+    await $.wait(Math.floor(Math.random() * (2000 - 1500 + 1)) + 1500);
+}
 
 /**
  * 发送请求
