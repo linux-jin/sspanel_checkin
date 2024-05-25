@@ -6,6 +6,7 @@
  */
 const $ = require('./env').Env('阿里云盘自动签到');
 const notify = $.isNode() ? require('./sendNotify') : '';
+const randomWait = require('./utils/getRandomWait');
 const axios = require('axios').default;
 const refreshTokenList = process.env.ALI_REFRESH_TOKEN ? process.env.ALI_REFRESH_TOKEN.split('&') : [];
 let message = '';
@@ -28,6 +29,7 @@ const API_CONFIG = {
         console.log(`\n*****开始第【${$.index}】个阿里账号****\n`);
         message += `📣==========阿里账号${$.index}==========📣\n`;
         await main(refreshToken);
+        await $.wait(randomWait(2300, 2800));
     }
     if (message) {
         await notify.sendNotify(`「阿里云盘签到报告」`, `${message}`);
@@ -36,7 +38,7 @@ const API_CONFIG = {
 
 async function main(refreshToken) {
     const accessToken = await getAccessToken(refreshToken);
-    await $.wait(1000);
+    await $.wait(randomWait(1200, 2000));
     const signInCount = await AliSignIn(refreshToken, accessToken);
     // await $.wait(1000);
     // await getReward(accessToken, signInCount);

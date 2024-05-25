@@ -6,6 +6,7 @@
  */
 const $ = require('./env').Env('司机社自动签到');
 const notify = $.isNode() ? require('./sendNotify') : '';
+const randomWait = require('./utils/getRandomWait');
 const axios = require('axios').default;
 const cheerio = require('cheerio');
 if (!process.env.SJS_COOKIE) {
@@ -29,6 +30,7 @@ let index = 0;
         }
         url = url.replace(/\/$/, '');
         await main(url, cookie);
+        await $.wait(randomWait(2000, 2500))
     }
     if (message) {
         await notify.sendNotify(`${$.name}`, `${message}`);
@@ -37,9 +39,9 @@ let index = 0;
 
 async function main(url, cookie) {
     await checkIn(url, cookie)
-    await $.wait(1000);
+    await $.wait(randomWait(1200, 1700));
     await getCheckInInfo(url, cookie)
-    await $.wait(1000);
+    await $.wait(randomWait(1100, 1600));
     await getUserInfo(url, cookie)
 }
 

@@ -6,6 +6,7 @@
  */
 const $ = require('./env').Env('V2EX每日签到');
 const notify = $.isNode() ? require('./sendNotify') : '';
+const randomWait = require('./utils/getRandomWait');
 const cheerio = require('cheerio');
 const axios = require('axios').default;
 const v2exList = process.env.V2EX_COOKIE ? process.env.V2EX_COOKIE.split('&') : [];
@@ -21,6 +22,7 @@ let message = '';
         console.log(`\n*****开始第【${index}】个V2ex账号****\n`);
         message += `📣==========V2ex账号${index}==========📣\n`;
         await main(cookie);
+        await $.wait(randomWait(2000, 3000));
     }
     if (message) {
         await notify.sendNotify(`${$.name}`, `${message}`);
@@ -88,7 +90,7 @@ async function getInfo(cookie) {
 }
 
 async function wait() {
-    await $.wait(Math.floor(Math.random() * (2000 - 1500 + 1)) + 1500);
+    await $.wait(randomWait(2000, 3000));
 }
 
 /**

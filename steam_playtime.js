@@ -9,6 +9,7 @@ const url = require("url");
  */
 const $ = require('./env').Env('Steam两周内游玩明细');
 const notify = $.isNode() ? require('./sendNotify') : '';
+const randomWait = require('./utils/getRandomWait');
 const axios = require('axios').default;
 let STEAM_TOKEN = process.env.STEAM_TOKEN, STEAM_64_ID = process.env.STEAM_64_ID, message = '';
 const STEAM_API = 'http://api.steampowered.com';
@@ -33,7 +34,7 @@ const personaStateMap = {
         return;
     }
     await getUser();
-    await $.wait(800);
+    await $.wait(randomWait(1000, 1200));
     await selectSteamTime();
     if (message) {
         console.log(message);

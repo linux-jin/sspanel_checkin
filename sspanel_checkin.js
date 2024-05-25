@@ -8,6 +8,7 @@
  */
 const $ = require('./env').Env('SSPANEL面板自动签到');
 const notify = $.isNode() ? require('./sendNotify') : '';
+const randomWait = require('./utils/getRandomWait');
 let message = '';
 const axios = require('axios').default;
 const accountList = process.env.SITE_ACCOUNTS ? process.env.SITE_ACCOUNTS.split('&') : [];
@@ -41,10 +42,10 @@ const accountList = process.env.SITE_ACCOUNTS ? process.env.SITE_ACCOUNTS.split(
         await login(url, email, pwd);
         if (1 === $.isRet) {
             console.log('开始签到白嫖流量...\n')
-            await $.wait(1000);
+            await $.wait(randomWait(1000, 2000));
             await checkin(url);
         }
-        await $.wait(2000);
+        await $.wait(randomWait(1000, 2000));
     }
     if (message) {
         await notify.sendNotify(`${$.name}`, `${message}`);

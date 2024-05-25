@@ -6,6 +6,7 @@
  */
 const $ = require('./env').Env('百度贴吧自动签到');
 const notify = $.isNode() ? require('./sendNotify') : '';
+const randomWait = require('./utils/getRandomWait');
 const axios = require('axios').default;
 const crypto = require('crypto');
 const tieBaList = process.env.TIE_BA_COOKIE ? process.env.TIE_BA_COOKIE.split('&') : [];
@@ -28,6 +29,7 @@ const TIEBA_API = {
         console.log(`\n*****开始第【${i + 1}】个贴吧账号****\n`);
         message += `📣==========贴吧账号${i + 1}==========📣\n`;
         await main(cookie);
+        await $.wait(randomWait(2000, 3000));
     }
     if (message) {
         await notify.sendNotify(`「百度贴吧签到报告」`, `${message}`);
@@ -37,9 +39,10 @@ const TIEBA_API = {
 async function main(cookie) {
     const tbs = await getTBS(cookie)
     const followList = await getTieBaFollow(cookie);
+    await $.wait(randomWait(800, 1200));
     for (const followName of followList) {
         await signTieBa(followName, tbs, cookie);
-        await $.wait(1000);
+        await $.wait(randomWait(1500, 2500));
     }
     console.log(`【签到统计】成功签到 ${success.length} 个, 失败 ${followList.length - success.length} 个`);
     message += `【贴吧总计】${followList.length} 个\n`;
