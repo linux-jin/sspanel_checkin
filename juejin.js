@@ -9,6 +9,7 @@
 const $ = require('./env').Env('掘金自动签到');
 const notify = $.isNode() ? require('./sendNotify') : '';
 const axios = require('axios').default;
+const moment = require('moment');
 let cookiesArr = process.env.JUEJIN_COOKIE ? process.env.JUEJIN_COOKIE.split('&') : [], message = '';
 const config = {
     // 掘金 API
@@ -34,12 +35,12 @@ if (!cookiesArr || cookiesArr.length === 0) {
                 await notify.sendNotify(`「掘金签到报告」`, `掘金账号${index} Cookie 已失效，请重新登录获取 Cookie`);
                 continue;
             }
-            await main();
+            await main(index);
         } catch (e) {
             console.error(`账号${index}发生异常: ${e}`);
         } finally {
-            // 确保API调用不会过于频繁
-            await $.wait(2000);
+            // 对每个账号的处理之间等待5秒
+            await $.wait(5000);
         }
     }
     if (message) {
@@ -52,7 +53,7 @@ if (!cookiesArr || cookiesArr.length === 0) {
  *
  * @returns {Promise<void>}
  */
-async function main() {
+async function main(index) {
     message += `「社区活跃任务详情」\n`
     // 任务列表
     console.log('开始做社区活跃任务...')
@@ -84,7 +85,8 @@ async function main() {
         await luckyDraw();
     }
     await $.wait(2000);
-    await geMyLucky();
+    const currentLuckyValue = await geMyLucky();
+    message += `【当前幸运值】${currentLuckyValue}/6000\n`
     console.log('开始执行十连抽...')
     message += `【十连抽详情】\n`
     if (!config.ENABLE_TEN_DRAW) {
@@ -102,8 +104,12 @@ async function main() {
     console.log(`十连抽次数默认为 ${config.TEN_DRAW_NUM} 次\n如需修改，请设置环境变量【TEN_DRAW_NUM】`)
     for (let i = 0; i < config.TEN_DRAW_NUM; i++) {
         await tenDraw();
-        if (i < config.TEN_DRAW_NUM - 1) {
-            await $.wait(2200);
+        if (currentLuckyValue >= 6000) {
+            await getLuckyDraw(index);
+        }
+        // 多次十连抽后等待两秒
+        if (config.TEN_DRAW_NUM > 1) {
+            await $.wait(Math.floor(Math.random() * 501) + 2200);
         }
     }
 }
@@ -639,7 +645,7 @@ async function luckyDraw() {
 async function geMyLucky() {
     const data = await sendRequest(config.JUEJIN_API + '/growth_api/v1/lottery_lucky/my_lucky', 'post', {});
     if ('success' === data.err_msg) {
-        message += `【当前幸运值】${data.data.total_value}/6000\n`
+        return data.data.total_value;
     }
 }
 
@@ -654,7 +660,7 @@ async function tenDraw() {
     for (let draw of $.lotteryBases) {
         message += `抽中了${draw.lottery_name}\n`
         console.log(`抽中了${draw.lottery_name}`)
-        await $.wait(1500);
+        await $.wait(2000);
     }
     // 当前幸运值
     let totalLuckyValue = data.data.total_lucky_value;
@@ -668,6 +674,27 @@ async function tenDraw() {
     console.log(`本次十连抽加${data.data.draw_lucky_value}幸运值`);
     console.log(`当前幸运值为${totalLuckyValue}`);
     console.log(`离幸运值满格还差${remainLuckyValue}幸运值，所需${needOreNum}矿石数，还需十连抽${remainLuckyValue / 100}次`);
+}
+
+/**
+ * 获取幸运格满格后的实物奖励信息
+ *
+ * @returns {Promise<*>}
+ */
+async function getLuckyDraw(index) {
+    const data = await sendRequest(config.JUEJIN_API + '/growth_api/v1/lottery_history/obj_by_page', 'post', {});
+    // 该接口默认按时间排序，无需排序
+    // const sortedHistories = data.data.lottery_histories.sort((a, b) => b.ctime - a.ctime);
+    if (data.data.lottery_histories.length === 0) {
+        console.log('暂无实物奖励, 请手动打开官网确认！');
+        return;
+    }
+    const lotteryHistory = data.data.lottery_histories[0];
+    lotteryHistory.ctime = moment.unix(lotteryHistory.ctime).format('YYYY-MM-DD HH:mm:ss');
+    // 重要的事说三遍
+    for (let i = 0; i < 3; i++) {
+        await notify.sendNotify(`「获得实物推送」`, `掘金账号【${index}】抽中实物奖励: ${lotteryHistory.lottery_name} 获得时间: ${lotteryHistory.ctime}\n请速去填写地址获取！！！`);
+    }
 }
 
 /**
