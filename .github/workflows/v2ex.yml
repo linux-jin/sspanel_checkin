@@ -3,7 +3,7 @@ name: V2EX Checkin
 on:
   workflow_dispatch:
   schedule:
-    - cron: "12 16 * * *"
+    - cron: "12 1 * * *"
 
 jobs:
   build:
